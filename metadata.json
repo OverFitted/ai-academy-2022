@@ -1,0 +1,4 @@
+{
+    "image": "archont/whynoalbumentations:prebuilt-mmcv",
+    "entry_point": "python run.py"
+}
