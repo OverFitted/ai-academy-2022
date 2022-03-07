@@ -32,7 +32,6 @@ TEST_IMAGES_PATH, SAVE_PATH = sys.argv[1:]
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 SEGM_MODEL_PATH = "segm-model.pth"
 OCR_RUS_MODEL_PATH = "ocr_model_rus.pth"
@@ -129,10 +128,10 @@ def predict_ocr(images, model, tokenizer, device):
     with torch.no_grad():
         for image_tensors in loader:
             batch_size = image_tensors.size(0)
-            image = image_tensors.to(device).float()
+            image = image_tensors.to(DEVICE).float()
 
-            length_for_pred = torch.IntTensor([25] * batch_size).to(device)
-            text_for_pred = torch.LongTensor(batch_size, 25 + 1).fill_(0).to(device)
+            length_for_pred = torch.IntTensor([25] * batch_size).to(DEVICE)
+            text_for_pred = torch.LongTensor(batch_size, 25 + 1).fill_(0).to(DEVICE)
 
             preds = model(image, text_for_pred, is_train=False)
 
@@ -187,7 +186,7 @@ def predict_lang(images, model, device):
         for image_tensors in loader:
             image_tensors = image_tensors.view((MINI_BATCH, 1, 32, 100)).float()
 #             print(image_tensors.shape)
-            preds = model(image_tensors.to(device))
+            preds = model(image_tensors.to(DEVICE))
             preds = torch.round(torch.sigmoid(preds.view(-1)))
             for p in preds:
                 predictions.append(p)
@@ -198,7 +197,7 @@ def predict_lang(images, model, device):
 class LanguagePredictor:
     def __init__(self, model_path, device='cuda'):
         self.model = EfficientNet.from_pretrained('efficientnet-b7', in_channels=1, num_classes=1)
-        self.model = self.model.to(device)
+        self.model = self.model.to(DEVICE)
         self.model.load_state_dict(torch.load(model_path))
         self.device = device
 
